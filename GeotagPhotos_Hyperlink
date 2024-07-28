@@ -1,0 +1,28 @@
+# GeotagPhotos_Hyperlink
+
+###################################################################################
+#### Read the README.md for step by step instructions on how to run the code. #####
+###################################################################################
+
+################### Input variables ###############################################
+infolder = input(r"Folder location containing the photos: ")
+outputfile = input(r"Output layer name: ")
+
+####################  Main functions ##############################################
+import arcpy,os
+# Get the current ArcGIS Pro project
+project = arcpy.mp.ArcGISProject("CURRENT")
+# Get the default geodatabase path
+default_gdb = project.defaultGeodatabase
+# Set the workspace to the default geodatabase
+arcpy.env.workspace = default_gdb
+# create output file path
+outfolder = os.path.join(default_gdb,outputfile)
+
+# arcpy.management.GeoTaggedPhotosToPoints(inFolder, outFeatures, badPhotosList,photoOption, attachmentsOption)
+arcpy.management.GeoTaggedPhotosToPoints(infolder,outfolder,"","ONLY_GEOTAGGED", "NO_ATTACHMENTS")
+# Add field=
+arcpy.management.AddField(in_table=outfolder, field_name="Hyperlink", field_type="TEXT",field_length=500)[0]
+# Calculate Field
+arcpy.management.CalculateField(in_table=outfolder, field="Hyperlink", expression='"<a href=\'" + !Path! + "\'>" + !Name! + "</a>"',expression_type="PYTHON3")
+print("Geotagged photo layer successfully saved in "+outfolder)
